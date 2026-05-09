@@ -1,0 +1,43 @@
+CREATE TABLE DEPARTMENT (
+    Department_Code VARCHAR2(10) PRIMARY KEY,
+    Department_Description VARCHAR2(100) NOT NULL
+);
+
+CREATE TABLE EMPLOYEE (
+    Emp_ID NUMBER PRIMARY KEY,
+    Dept_ID VARCHAR2(10) NOT NULL,
+    Emp_FName VARCHAR2(50) NOT NULL,
+    Emp_LName VARCHAR2(50) NOT NULL,
+    Emp_DOB DATE,
+    Emp_Contact VARCHAR2(20),
+    Emp_Email VARCHAR2(100),
+    Emp_Gender CHAR(1),
+    Emp_Type VARCHAR2(30),
+
+    CONSTRAINT FK_EMPLOYEE_DEPARTMENT
+    FOREIGN KEY (Dept_ID)
+    REFERENCES DEPARTMENT(Department_Code)
+);
+
+CREATE TABLE SPONSOR (
+    Sponsor_ID NUMBER PRIMARY KEY,
+    Sponsor_Alias VARCHAR2(100) NOT NULL
+);
+
+CREATE TABLE CONTRACT (
+    Contract_ID NUMBER PRIMARY KEY,
+    Contract_Period VARCHAR2(50),
+    Contract_Desc VARCHAR2(200),
+    DateOfAgreement DATE
+);
+
+CREATE TABLE CIRCUIT (
+    Circuit_ID NUMBER PRIMARY KEY,
+    Circuit_Location VARCHAR2(100) NOT NULL,
+    Circuit_TimeZone VARCHAR2(50)
+);
+
+CREATE TABLE SEASON (
+    Season_ID NUMBER PRIMARY KEY,
+    Season NUMBER(4) NOT NULL
+);
