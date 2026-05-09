@@ -110,3 +110,8 @@ CREATE TABLE SHIPPED_ASSET(
     REFERENCES ASSET(Asset_ID)
 );
 
+CREATE TABLE EVENT --generic table, needed for FK
+(
+    Event_ID    NUMBER(5),
+    CONSTRAINT PK_EVENT PRIMARY KEY (Event_ID)
+);
