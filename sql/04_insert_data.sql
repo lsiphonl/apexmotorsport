@@ -16,6 +16,8 @@ INSERT INTO EMPLOYEE VALUES (2, 'BUS', 'Tjay', 'Burger', DATE '2004-08-20', '072
 INSERT INTO EMPLOYEE VALUES (3, 'ENG', 'Wihan', 'Jacobsz', DATE '2004-03-15', '0733333333', 'wihan@nwu.ac.za', 'M', 'Engineer');
 INSERT INTO EMPLOYEE VALUES (4, 'HR', 'Stephan', 'van Rensburg', DATE '2004-11-04', '0744444444', 'stephan@nwu.ac.za', 'M', 'HR Scheduler');
 INSERT INTO EMPLOYEE VALUES (5, 'PIT', 'Ruben', 'Badenhorst', DATE '2004-07-22', '0755555555', 'ruben@nwu.ac.za', 'M', 'Mechanic');
+INSERT INTO EMPLOYEE VALUES (1001, 'ENG', 'Max', 'Verstappen', DATE '1997-09-30', '0766666666', 'max@nwu.ac.za', 'M', 'Driver');
+INSERT INTO EMPLOYEE VALUES (1002, 'ENG', 'Lando', 'Norris', DATE '1997-08-31', '0777777777', 'lando@nwu.ac.za', 'M', 'Driver');
 
 -- SPONSOR
 INSERT INTO SPONSOR VALUES (1, 'Oracle');
@@ -88,6 +90,6 @@ INSERT INTO CAR VALUES (1, 798, 'Operational', 03, 2026, 1001);
 INSERT INTO CAR VALUES (2, 801, 'Operational', 04, 2026, 1002);
 INSERT INTO CAR VALUES (3, 795, 'InForService', 01, 2025, 1001);
 INSERT INTO CAR VALUES (4, 770, 'Retired', 01, 2023, 1001);
-INSERT INTO CAR VALUES (1, 798, 'Non-Operational', 01, 2024, 1001);
+INSERT INTO CAR VALUES (5, 798, 'Non-Operational', 01, 2024, 1001);
 
 COMMIT;
