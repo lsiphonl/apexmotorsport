@@ -46,3 +46,15 @@ FROM EMP_EVENT_ASSIGNMENT eea
 JOIN EMPLOYEE emp ON eea.Emp_ID = emp.Emp_ID
 JOIN EVENT e ON eea.Event_ID = e.Event_ID
 JOIN CIRCUIT c ON e.Circuit_ID = c.Circuit_ID;
+
+CREATE VIEW VW_CAR_COMPONENTS AS
+SELECT
+    c.Car_ID,
+    p.Part_Num,
+    p.Part_Type,
+    cp.Fitment_Date
+FROM CAR c
+JOIN CAR_PART cp
+ON c.Car_ID = cp.Car_ID
+JOIN PART p
+ON cp.Part_Num = p.Part_Num;
