@@ -33,17 +33,17 @@ INSERT INTO CONTRACT VALUES (3, '2026 Season', 'Tyre supply partnership agreemen
 INSERT INTO CONTRACT VALUES (4, '2026 Season', 'Driver salary agreement', DATE '2026-02-01');
 INSERT INTO CONTRACT VALUES (5, '2026 Season', 'IT infrastructure support agreement', DATE '2026-02-05');
 
--- CIRCUIT
-INSERT INTO CIRCUIT VALUES (1, 'Monaco', 'CET');
-INSERT INTO CIRCUIT VALUES (2, 'Silverstone', 'GMT');
-INSERT INTO CIRCUIT VALUES (3, 'Spa-Francorchamps', 'CET');
-INSERT INTO CIRCUIT VALUES (4, 'Monza', 'CET');
-INSERT INTO CIRCUIT VALUES (5, 'Suzuka', 'JST');
-
 -- SEASON
-INSERT INTO SEASON VALUES (1, 2026);
-INSERT INTO SEASON VALUES (2, 2025);
-INSERT INTO SEASON VALUES (3, 2024);
+INSERT INTO SEASON (Season_ID, Season) VALUES (1, 2026);
+INSERT INTO SEASON (Season_ID, Season) VALUES (2, 2025);
+INSERT INTO SEASON (Season_ID, Season) VALUES (3, 2024);
+
+-- CIRCUIT
+INSERT INTO CIRCUIT (Circuit_ID, Circuit_Location, Circuit_TimeZone) VALUES (1, 'Monaco', 'CET');
+INSERT INTO CIRCUIT (Circuit_ID, Circuit_Location, Circuit_TimeZone) VALUES (2, 'Silverstone', 'GMT');
+INSERT INTO CIRCUIT (Circuit_ID, Circuit_Location, Circuit_TimeZone) VALUES (3, 'Spa-Francorchamps', 'CET');
+INSERT INTO CIRCUIT (Circuit_ID, Circuit_Location, Circuit_TimeZone) VALUES (4, 'Monza', 'CET');
+INSERT INTO CIRCUIT (Circuit_ID, Circuit_Location, Circuit_TimeZone) VALUES (5, 'Suzuka', 'JST');
 
 -- EMP_CONTRACT
 INSERT INTO EMP_CONTRACT VALUES (1, 2);
@@ -96,9 +96,9 @@ INSERT INTO SHIPPED_ASSET VALUES (3, 4);
 INSERT INTO SHIPPED_ASSET VALUES (3, 5);
 
 -- EVENT
-INSERT INTO EVENT VALUES (90001);
-INSERT INTO EVENT VALUES (90002);
-INSERT INTO EVENT VALUES (90003);
+INSERT INTO EVENT (Event_ID, Circuit_ID, Season_ID, Event_Date) VALUES (90001, 1, 1, DATE '2026-03-01');
+INSERT INTO EVENT (Event_ID, Circuit_ID, Season_ID, Event_Date) VALUES (90002, 2, 1, DATE '2026-03-15');
+INSERT INTO EVENT (Event_ID, Circuit_ID, Season_ID, Event_Date) VALUES (90003, 3, 1, DATE '2026-04-05');
 
 -- CAR
 INSERT INTO CAR VALUES (1, 798, 'Operational', 03, 2026, 1001);
@@ -197,9 +197,9 @@ INSERT INTO PITCREW_MEMBER VALUES (12, 'Front Jack');
 INSERT INTO PITCREW_MEMBER VALUES (13, 'Rear Jack');
 COMMIT;
 
-INSERT INTO CIRCUIT VALUES (6, 'Bahrain International Circuit', 'AST');
-INSERT INTO CIRCUIT VALUES (7, 'Albert Park Circuit',           'AEDT');
-INSERT INTO CIRCUIT VALUES (8, 'Circuit de Barcelona-Catalunya','CET');
+INSERT INTO CIRCUIT (Circuit_ID, Circuit_Location, Circuit_TimeZone) VALUES (6, 'Bahrain International Circuit', 'AST');
+INSERT INTO CIRCUIT (Circuit_ID, Circuit_Location, Circuit_TimeZone) VALUES (7, 'Albert Park Circuit',           'AEDT');
+INSERT INTO CIRCUIT (Circuit_ID, Circuit_Location, Circuit_TimeZone) VALUES (8, 'Circuit de Barcelona-Catalunya','CET');
 COMMIT;
 
 INSERT INTO PART VALUES (101, 'C',  'New', 1);
@@ -241,23 +241,23 @@ INSERT INTO CAR VALUES (1, 798.5, 'Active', 1, 1, 6);
 INSERT INTO CAR VALUES (2, 800.0, 'Active', 2, 1, 7);
 COMMIT;
 
-INSERT INTO EVENT VALUES (1, 6, 1, 'Bahrain Grand Prix',    DATE '2026-03-01', DATE '2026-03-03', 'Completed');
-INSERT INTO EVENT VALUES (2, 7, 1, 'Australian Grand Prix', DATE '2026-03-15', DATE '2026-03-17', 'Completed');
-INSERT INTO EVENT VALUES (3, 1, 1, 'Monaco Grand Prix',     DATE '2026-05-21', DATE '2026-05-25', 'Completed');
-INSERT INTO EVENT VALUES (4, 8, 1, 'Spanish Grand Prix',    DATE '2026-06-01', DATE '2026-06-03', 'Upcoming');
-INSERT INTO EVENT VALUES (5, 3, 1, 'Belgian Grand Prix',    DATE '2026-07-27', DATE '2026-07-29', 'Upcoming');
+INSERT INTO EVENT (Event_ID, Circuit_ID, Season_ID, Event_Date) VALUES (1, 6, 1, DATE '2026-03-01');
+INSERT INTO EVENT (Event_ID, Circuit_ID, Season_ID, Event_Date) VALUES (2, 7, 1, DATE '2026-03-15');
+INSERT INTO EVENT (Event_ID, Circuit_ID, Season_ID, Event_Date) VALUES (3, 1, 1, DATE '2026-05-21');
+INSERT INTO EVENT (Event_ID, Circuit_ID, Season_ID, Event_Date) VALUES (4, 8, 1, DATE '2026-06-01');
+INSERT INTO EVENT (Event_ID, Circuit_ID, Season_ID, Event_Date) VALUES (5, 3, 1, DATE '2026-07-27');
 COMMIT;
 
-INSERT INTO EMP_EVENT_ASSIGNMENT VALUES (1,  6, 1, 'Y', 'Driver - Bahrain GP');
-INSERT INTO EMP_EVENT_ASSIGNMENT VALUES (2,  7, 1, 'Y', 'Driver - Bahrain GP');
-INSERT INTO EMP_EVENT_ASSIGNMENT VALUES (3,  8, 1, 'Y', 'Engineer - Bahrain GP');
-INSERT INTO EMP_EVENT_ASSIGNMENT VALUES (4,  9, 1, 'Y', 'Engineer - Bahrain GP');
-INSERT INTO EMP_EVENT_ASSIGNMENT VALUES (5,  6, 2, 'Y', 'Driver - Australian GP');
-INSERT INTO EMP_EVENT_ASSIGNMENT VALUES (6,  7, 2, 'Y', 'Driver - Australian GP');
-INSERT INTO EMP_EVENT_ASSIGNMENT VALUES (7,  8, 2, 'Y', 'Engineer - Australian GP');
-INSERT INTO EMP_EVENT_ASSIGNMENT VALUES (8,  9, 2, 'Y', 'Engineer - Australian GP');
-INSERT INTO EMP_EVENT_ASSIGNMENT VALUES (9,  6, 3, 'Y', 'Driver - Monaco GP');
-INSERT INTO EMP_EVENT_ASSIGNMENT VALUES (10, 7, 3, 'Y', 'Driver - Monaco GP');
+INSERT INTO EMP_EVENT_ASSIGNMENT (Assignment_Code, Emp_ID, Event_ID, Expected_Arrival, Assignment_Desc) VALUES (1,  6, 1, DATE '2026-02-27', 'Driver - Bahrain GP');
+INSERT INTO EMP_EVENT_ASSIGNMENT (Assignment_Code, Emp_ID, Event_ID, Expected_Arrival, Assignment_Desc) VALUES (2,  7, 1, DATE '2026-02-27', 'Driver - Bahrain GP');
+INSERT INTO EMP_EVENT_ASSIGNMENT (Assignment_Code, Emp_ID, Event_ID, Expected_Arrival, Assignment_Desc) VALUES (3,  8, 1, DATE '2026-02-26', 'Engineer - Bahrain GP');
+INSERT INTO EMP_EVENT_ASSIGNMENT (Assignment_Code, Emp_ID, Event_ID, Expected_Arrival, Assignment_Desc) VALUES (4,  9, 1, DATE '2026-02-26', 'Engineer - Bahrain GP');
+INSERT INTO EMP_EVENT_ASSIGNMENT (Assignment_Code, Emp_ID, Event_ID, Expected_Arrival, Assignment_Desc) VALUES (5,  6, 2, DATE '2026-03-12', 'Driver - Australian GP');
+INSERT INTO EMP_EVENT_ASSIGNMENT (Assignment_Code, Emp_ID, Event_ID, Expected_Arrival, Assignment_Desc) VALUES (6,  7, 2, DATE '2026-03-12', 'Driver - Australian GP');
+INSERT INTO EMP_EVENT_ASSIGNMENT (Assignment_Code, Emp_ID, Event_ID, Expected_Arrival, Assignment_Desc) VALUES (7,  8, 2, DATE '2026-03-11', 'Engineer - Australian GP');
+INSERT INTO EMP_EVENT_ASSIGNMENT (Assignment_Code, Emp_ID, Event_ID, Expected_Arrival, Assignment_Desc) VALUES (8,  9, 2, DATE '2026-03-11', 'Engineer - Australian GP');
+INSERT INTO EMP_EVENT_ASSIGNMENT (Assignment_Code, Emp_ID, Event_ID, Expected_Arrival, Assignment_Desc) VALUES (9,  6, 3, DATE '2026-05-18', 'Driver - Monaco GP');
+INSERT INTO EMP_EVENT_ASSIGNMENT (Assignment_Code, Emp_ID, Event_ID, Expected_Arrival, Assignment_Desc) VALUES (10, 7, 3, DATE '2026-05-18', 'Driver - Monaco GP');
 COMMIT;
 
 INSERT INTO RACE_SESSION VALUES (1, 1, 'PRACTICE',   TO_TIMESTAMP('2026-03-01 10:00:00','YYYY-MM-DD HH24:MI:SS'), 91.234, 'Y');
