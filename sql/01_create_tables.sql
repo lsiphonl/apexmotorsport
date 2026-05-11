@@ -128,7 +128,9 @@ CREATE TABLE CAR
 (
     Car_ID         NUMBER(3),
     Car_Weight     NUMBER(6,2),     -- kilograms
-    Car_Status     VARCHAR2(20) CHECK (Car_Status IN (
+    Car_Status     VARCHAR2(20), 
+    CONSTRAINT  Car_Status_Constraint CHECK
+    (Car_Status IN (
     'Operational',
     'Non-Operational',
     'InForService',
