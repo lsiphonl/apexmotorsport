@@ -296,3 +296,196 @@ CREATE TABLE MECHANIC
         FOREIGN KEY (Emp_ID)
         REFERENCES EMPLOYEE(Emp_ID)
 );
+-- ============================================================
+-- SESSION DATA & TECHNICAL DATA TABLES
+-- ============================================================
+
+CREATE TABLE DRIVER (
+    Emp_ID       NUMBER PRIMARY KEY,
+    F1_Ranking   NUMBER(2),
+    Country      VARCHAR2(50),
+    CONSTRAINT FK_DRIVER_EMP FOREIGN KEY (Emp_ID)
+        REFERENCES EMPLOYEE(Emp_ID)
+);
+
+CREATE TABLE ENGINEER (
+    Emp_ID        NUMBER PRIMARY KEY,
+    Driver_Emp_ID NUMBER,
+    CONSTRAINT FK_ENGINEER_EMP FOREIGN KEY (Emp_ID)
+        REFERENCES EMPLOYEE(Emp_ID)
+);
+
+CREATE TABLE MECHANIC (
+    Emp_ID          NUMBER PRIMARY KEY,
+    Engineer_Emp_ID NUMBER,
+    Speciality      VARCHAR2(50),
+    CONSTRAINT FK_MECHANIC_EMP FOREIGN KEY (Emp_ID)
+        REFERENCES EMPLOYEE(Emp_ID)
+);
+
+CREATE TABLE PITCREW_MEMBER (
+    Emp_ID          NUMBER PRIMARY KEY,
+    Pitcrew_Section VARCHAR2(50),
+    CONSTRAINT FK_PITCREW_EMP FOREIGN KEY (Emp_ID)
+        REFERENCES EMPLOYEE(Emp_ID)
+);
+
+CREATE TABLE TIRE_SET (
+    Part_Num        NUMBER(5) PRIMARY KEY,
+    Laps_Done       NUMBER(3),
+    Compound        VARCHAR2(20),
+    Total_Lap_KM    NUMBER(8,3),
+    Wear_Percentage NUMBER(5,2),
+    CONSTRAINT FK_TIRE_PART FOREIGN KEY (Part_Num)
+        REFERENCES PART(Part_Num),
+    CHECK (Wear_Percentage BETWEEN 0 AND 100)
+);
+
+CREATE TABLE EMP_EVENT_ASSIGNMENT (
+    Assignment_ID   NUMBER PRIMARY KEY,
+    Emp_ID          NUMBER NOT NULL,
+    Event_ID        NUMBER NOT NULL,
+    Attended        CHAR(1),
+    Assignment_Desc VARCHAR2(100),
+    CONSTRAINT FK_EEA_EMP   FOREIGN KEY (Emp_ID)
+        REFERENCES EMPLOYEE(Emp_ID),
+    CONSTRAINT FK_EEA_EVENT FOREIGN KEY (Event_ID)
+        REFERENCES EVENT(Event_ID)
+);
+
+CREATE TABLE RACE_SESSION (
+    Session_ID    NUMBER(10) CONSTRAINT PK_RACE_SESSION PRIMARY KEY,
+    Event_ID      NUMBER(10) NOT NULL
+                  CONSTRAINT FK_RS_EVENT REFERENCES EVENT(Event_ID),
+    Session_Type  VARCHAR2(20) NOT NULL,
+    Start_Time    TIMESTAMP NOT NULL,
+    Best_Lap_Time NUMBER(10,3),
+    isPractice    CHAR(1) DEFAULT 'N'
+                  CONSTRAINT CHK_RS_PRACTICE
+                      CHECK (isPractice IN ('Y','N'))
+);
+
+CREATE TABLE DRIVER_SESSION (
+    Emp_ID     NUMBER(10) CONSTRAINT FK_DS_EMP
+                   REFERENCES EMPLOYEE(Emp_ID),
+    Session_ID NUMBER(10) CONSTRAINT FK_DS_SESSION
+                   REFERENCES RACE_SESSION(Session_ID),
+    CONSTRAINT PK_DRIVER_SESSION PRIMARY KEY (Emp_ID, Session_ID)
+);
+
+CREATE TABLE PITSTOP (
+    PS_ID        NUMBER(10) CONSTRAINT PK_PITSTOP PRIMARY KEY,
+    Session_ID   NUMBER(10) NOT NULL
+                 CONSTRAINT FK_PS_SESSION
+                     REFERENCES RACE_SESSION(Session_ID),
+    Car_ID       NUMBER(10) NOT NULL
+                 CONSTRAINT FK_PS_CAR
+                     REFERENCES CAR(Car_ID),
+    Lap_Number   NUMBER(3)  NOT NULL,
+    Duration_Sec NUMBER(6,3) NOT NULL,
+    Stop_Type    VARCHAR2(20) DEFAULT 'TYRE_CHANGE'
+                 CONSTRAINT CHK_PS_TYPE CHECK (Stop_Type IN (
+                     'TYRE_CHANGE','FRONT_WING','NOSE_CHANGE',
+                     'DRIVE_THROUGH','REPAIR','RETIRE')),
+    CONSTRAINT CHK_PS_DUR CHECK (Duration_Sec > 0),
+    CONSTRAINT CHK_PS_LAP CHECK (Lap_Number > 0)
+);
+
+CREATE TABLE WEATHER_CONDITION (
+    Condition_ID       NUMBER(10) CONSTRAINT PK_WEATHER PRIMARY KEY,
+    Session_ID         NUMBER(10) NOT NULL
+                       CONSTRAINT FK_WC_SESSION
+                           REFERENCES RACE_SESSION(Session_ID),
+    Recorded_At        TIMESTAMP  NOT NULL,
+    Air_Temp_Celsius   NUMBER(5,2) NOT NULL,
+    Track_Temp_Celsius NUMBER(5,2) NOT NULL,
+    Humidity_pct       NUMBER(5,2) NOT NULL,
+    Wind_Speed_kmh     NUMBER(6,2) NOT NULL,
+    Track_Condition    VARCHAR2(15) DEFAULT 'DRY'
+                       CONSTRAINT CHK_WC_COND CHECK (Track_Condition IN (
+                           'DRY','WET','INTERMEDIATE','DAMP','FLOODED')),
+    CONSTRAINT CHK_WC_HUM  CHECK (Humidity_pct BETWEEN 0 AND 100),
+    CONSTRAINT CHK_WC_WIND CHECK (Wind_Speed_kmh >= 0)
+);
+
+CREATE TABLE TELEMETRY_LOG (
+    Log_ID       NUMBER(10) CONSTRAINT PK_TELEMETRY PRIMARY KEY,
+    Session_ID   NUMBER(10) NOT NULL
+                 CONSTRAINT FK_TL_SESSION
+                     REFERENCES RACE_SESSION(Session_ID),
+    Car_ID       NUMBER(10) NOT NULL
+                 CONSTRAINT FK_TL_CAR
+                     REFERENCES CAR(Car_ID),
+    Recorded_At  TIMESTAMP  NOT NULL,
+    Speed_kmh    NUMBER(6,3) NOT NULL,
+    Gear         NUMBER(1)   NOT NULL,
+    Throttle_pct NUMBER(5,2) NOT NULL,
+    Brake_pct    NUMBER(5,2) NOT NULL,
+    Lap_Number   NUMBER(3)   NOT NULL,
+    DRS_Active   CHAR(1) DEFAULT 'N'
+                 CONSTRAINT CHK_TL_DRS CHECK (DRS_Active IN ('Y','N')),
+    CONSTRAINT CHK_TL_SPEED    CHECK (Speed_kmh >= 0),
+    CONSTRAINT CHK_TL_GEAR     CHECK (Gear BETWEEN 0 AND 8),
+    CONSTRAINT CHK_TL_THROTTLE CHECK (Throttle_pct BETWEEN 0 AND 100),
+    CONSTRAINT CHK_TL_BRAKE    CHECK (Brake_pct BETWEEN 0 AND 100)
+);
+
+CREATE TABLE FUEL_CONSUMPTION (
+    Fuel_ID         NUMBER(10) CONSTRAINT PK_FUEL PRIMARY KEY,
+    Session_ID      NUMBER(10) NOT NULL
+                    CONSTRAINT FK_FC_SESSION
+                        REFERENCES RACE_SESSION(Session_ID),
+    Car_ID          NUMBER(10) NOT NULL
+                    CONSTRAINT FK_FC_CAR
+                        REFERENCES CAR(Car_ID),
+    Fuel_Load_Start NUMBER(5,2) NOT NULL,
+    Fuel_Used_Lap   NUMBER(5,3) NOT NULL,
+    Recorded_At     TIMESTAMP   NOT NULL,
+    Lap_Number      NUMBER(3)   NOT NULL,
+    Fuel_Remaining  NUMBER(5,2),
+    CONSTRAINT CHK_FC_LOAD CHECK (Fuel_Load_Start > 0),
+    CONSTRAINT CHK_FC_USED CHECK (Fuel_Used_Lap >= 0),
+    CONSTRAINT CHK_FC_REM  CHECK (Fuel_Remaining >= 0),
+    CONSTRAINT CHK_FC_LAP  CHECK (Lap_Number > 0)
+);
+
+CREATE TABLE RACE_RESULT (
+    Result_ID       NUMBER(10) CONSTRAINT PK_RESULT PRIMARY KEY,
+    Event_ID        NUMBER(10) NOT NULL
+                    CONSTRAINT FK_RR_EVENT
+                        REFERENCES EVENT(Event_ID),
+    Emp_ID          NUMBER(10) NOT NULL
+                    CONSTRAINT FK_RR_EMP
+                        REFERENCES EMPLOYEE(Emp_ID),
+    Final_Position  NUMBER(2),
+    Status          VARCHAR2(15) DEFAULT 'FINISHED'
+                    CONSTRAINT CHK_RR_STATUS CHECK (Status IN (
+                        'FINISHED','DNF','DNS','DSQ','CLASSIFIED')),
+    Total_Race_Time NUMBER(10,3),
+    Fastest_Lap     NUMBER(10,3),
+    Points_Awarded  NUMBER(4,1) DEFAULT 0,
+    CONSTRAINT CHK_RR_POS      CHECK (Final_Position BETWEEN 1 AND 20),
+    CONSTRAINT CHK_RR_PTS      CHECK (Points_Awarded >= 0),
+    CONSTRAINT UQ_RR_EVENT_EMP UNIQUE (Event_ID, Emp_ID)
+);
+
+CREATE TABLE QUALIFYING_LAP (
+    Qual_Lap_ID   NUMBER(10) CONSTRAINT PK_QUAL PRIMARY KEY,
+    Event_ID      NUMBER(10) NOT NULL
+                  CONSTRAINT FK_QL_EVENT
+                      REFERENCES EVENT(Event_ID),
+    Emp_ID        NUMBER(10) NOT NULL
+                  CONSTRAINT FK_QL_EMP
+                      REFERENCES EMPLOYEE(Emp_ID),
+    Tire_Set_Num  NUMBER(10) NOT NULL
+                  CONSTRAINT FK_QL_TIRE
+                      REFERENCES TIRE_SET(Part_Num),
+    Lap_Time      NUMBER(10,3) NOT NULL,
+    Segment       VARCHAR2(3) NOT NULL
+                  CONSTRAINT CHK_QL_SEG CHECK (Segment IN ('Q1','Q2','Q3')),
+    Lap_Number    NUMBER(2)   NOT NULL,
+    Grid_Position NUMBER(2),
+    CONSTRAINT CHK_QL_LAPTIME CHECK (Lap_Time > 0),
+    CONSTRAINT CHK_QL_LAPNUM  CHECK (Lap_Number > 0),
+    CONSTRAINT CHK_QL_GRID    CHECK (Grid_Position BETWEEN 1 AND 20)
+);
