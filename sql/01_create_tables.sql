@@ -1,6 +1,3 @@
---INTELLIGENT KEYS??? (EMP001)
---Subtype entities to be added(ENGINEER, DRIVER, MECHANIC, PITCREW_MEMBER)??
-
 CREATE TABLE DEPARTMENT (
     Department_Code VARCHAR2(10) PRIMARY KEY,
     Department_Description VARCHAR2(100) NOT NULL
@@ -91,7 +88,7 @@ CREATE TABLE SHIPMENT(
 CREATE TABLE ASSET(
   Asset_ID NUMBER PRIMARY KEY,
   Asset_Description VARCHAR2(100) NOT NULL,
-  Asset_Quantity NUMBER CHECK (Asset_Quantity > 0)
+  Asset_Quantity NUMBER CHECK (Asset_Quantity >= 0)
 );
 
 CREATE TABLE SHIPPED_ASSET(
@@ -110,29 +107,31 @@ CREATE TABLE SHIPPED_ASSET(
     REFERENCES ASSET(Asset_ID)
 );
 
+CREATE TABLE EVENT (
+    Event_ID NUMBER PRIMARY KEY,
+    Circuit_ID NUMBER NOT NULL,
+    Season_ID NUMBER NOT NULL,
+    Event_Date DATE NOT NULL,
 
+    CONSTRAINT FK_EVENT_CIRCUIT
+    FOREIGN KEY (Circuit_ID)
+    REFERENCES CIRCUIT(Circuit_ID),
 
-
-
-
-
-
-CREATE TABLE EVENT --blank table, needed the FK :)
-(
-    Event_ID        NUMBER(5),
-    CONSTRAINT PK_EVENT
-        PRIMARY KEY (Event_ID)
+    CONSTRAINT FK_EVENT_SEASON
+    FOREIGN KEY (Season_ID)
+    REFERENCES SEASON(Season_ID)
 );
-
-
-
-
 
 CREATE TABLE CAR
 (
     Car_ID         NUMBER(3),
     Car_Weight     NUMBER(6,2),     -- kilograms
-    Car_Status     VARCHAR2(20),    -- Operational/Non-Operational/InForService/Retired
+    Car_Status     VARCHAR2(20) CHECK (Car_Status IN (
+    'Operational',
+    'Non-Operational',
+    'InForService',
+    'Retired')),
+
     FIA_Car_Num    NUMBER(2) NOT NULL,
     Season_Used    NUMBER(4),
     Emp_ID         NUMBER(10) NOT NULL,
@@ -148,43 +147,28 @@ CREATE TABLE CAR
 
 CREATE TABLE PART
 (
-    Part_Num          NUMBER(5),
-    Part_Type         VARCHAR2(5),   -- AC/C/PU/TS/G/O - AeroComponent/Chassis/PowerUnit/TyreSet/Gearbox/Other
-    Part_Condition    VARCHAR2(20),  -- New/Used/Damaged
-    Asset_ID          NUMBER(10) NOT NULL,
+    Part_Num NUMBER(5),
+    Part_Type VARCHAR2(5) CHECK (Part_Type IN ('AC','C','PU','TS','G','O')),   -- AC/C/PU/TS/G/O - AeroComponent/Chassis/PowerUnit/TyreSet/Gearbox/Other
+    Part_Condition VARCHAR2(20) CHECK (Part_Condition IN ('New','Used','Damaged')),  -- New/Used/Damaged
+    Asset_ID NUMBER(10) NOT NULL,
 
-    CONSTRAINT PK_Part_Num
-        PRIMARY KEY (Part_Num),
-
-    CONSTRAINT FK_Asset_ID
-        FOREIGN KEY (Asset_ID)
-        REFERENCES ASSET(Asset_ID),
-    CHECK (Part_Type IN ('AC','C','PU','TS','G','O')) -- AeroComponent/Chassis/PowerUnit/TyreSet/Gearbox/Other
+    CONSTRAINT PK_Part_Num PRIMARY KEY (Part_Num),
+    CONSTRAINT FK_Asset_ID FOREIGN KEY (Asset_ID)
+    REFERENCES ASSET(Asset_ID)
 );
 
-CREATE TABLE CAR_PART
-(
-    Car_ID            NUMBER(3),
-    Part_Num          NUMBER(5),
-    Event_ID          NUMBER(5),
-    Fitment_Date      DATE,
-    Removal_Date      DATE,
-    Fitment_Status    VARCHAR2(15),   -- Fitted/Removed
+CREATE TABLE CAR_PART(
+    Car_ID NUMBER(3),
+    Part_Num NUMBER(5),
+    Event_ID NUMBER(5),
+    Fitment_Date DATE,
+    Removal_Date DATE,
+    Fitment_Status VARCHAR2(15) CHECK (Fitment_Status IN ('Fitted','Removed')), -- Fitted/Removed
 
-    CONSTRAINT PK_CAR_PART
-        PRIMARY KEY (Car_ID, Part_Num),
-
-    CONSTRAINT FK_CP_CAR
-        FOREIGN KEY (Car_ID)
-        REFERENCES CAR(Car_ID),
-
-    CONSTRAINT FK_CP_PART
-        FOREIGN KEY (Part_Num)
-        REFERENCES PART(Part_Num),
-
-    CONSTRAINT FK_CP_Event_ID
-        FOREIGN KEY (Event_ID)
-        REFERENCES EVENT(Event_ID)
+    CONSTRAINT PK_CAR_PART PRIMARY KEY (Car_ID, Part_Num, Event_ID),
+    CONSTRAINT FK_CP_CAR FOREIGN KEY (Car_ID) REFERENCES CAR(Car_ID),
+    CONSTRAINT FK_CP_PART FOREIGN KEY (Part_Num) REFERENCES PART(Part_Num),
+    CONSTRAINT FK_CP_Event_ID FOREIGN KEY (Event_ID) REFERENCES EVENT(Event_ID)
 );
 
 CREATE TABLE AERO_COMPONENT
@@ -249,53 +233,9 @@ CREATE TABLE GEARBOX
         REFERENCES PART(Part_Num)
 );
 
-CREATE TABLE TYRE
-(
-    Part_Num           NUMBER(5),
-    Laps_Done          NUMBER(3),
-    Compound_Type      VARCHAR2(20),  --c1/c2/c3/c4/c5/c6
-    Wear_Percentage    NUMBER(5,2) DEFAULT 100.00,
-    
-    CONSTRAINT PK_TYRE
-        PRIMARY KEY (Part_Num),
+--Deleted tyre entity
 
-    CONSTRAINT FK_TYRE_PART
-        FOREIGN KEY (Part_Num)
-        REFERENCES PART(Part_Num),
-    CHECK (Wear_Percentage BETWEEN 0 AND 100)
-);
-
-CREATE TABLE PITCREW_MEMBER
-(
-    Emp_ID         NUMBER(10),
-    PitcrewSection VARCHAR2(20),
-
-    CONSTRAINT PK_PITCREW_MEMBER
-        PRIMARY KEY (Emp_ID),
-
-    CONSTRAINT FK_PM_EMPLOYEE
-        FOREIGN KEY (Emp_ID)
-        REFERENCES EMPLOYEE(Emp_ID)
-);
-
-
-CREATE TABLE MECHANIC
-(
-    Emp_ID          NUMBER(10),
-    Engineer_Emp_ID NUMBER(10),
-    Speciality      VARCHAR2(20),
-
-    CONSTRAINT PK_MECHANIC
-        PRIMARY KEY (Emp_ID),
-
-    CONSTRAINT FK_MC_ENGINEER
-        FOREIGN KEY (Engineer_Emp_ID)
-        REFERENCES ENGINEER(Emp_ID),
-
-    CONSTRAINT FK_MC_EMPLOYEE
-        FOREIGN KEY (Emp_ID)
-        REFERENCES EMPLOYEE(Emp_ID)
-);
+--Deleted duplicate mechanic and crew member entities
 -- ============================================================
 -- SESSION DATA & TECHNICAL DATA TABLES
 -- ============================================================
@@ -312,7 +252,9 @@ CREATE TABLE ENGINEER (
     Emp_ID        NUMBER PRIMARY KEY,
     Driver_Emp_ID NUMBER,
     CONSTRAINT FK_ENGINEER_EMP FOREIGN KEY (Emp_ID)
-        REFERENCES EMPLOYEE(Emp_ID)
+    REFERENCES EMPLOYEE(Emp_ID),
+    CONSTRAINT FK_ENGINEER_DRIVER FOREIGN KEY(Driver_Emp_ID)
+    REFERENCES DRIVER(Emp_ID)
 );
 
 CREATE TABLE MECHANIC (
@@ -320,14 +262,15 @@ CREATE TABLE MECHANIC (
     Engineer_Emp_ID NUMBER,
     Speciality      VARCHAR2(50),
     CONSTRAINT FK_MECHANIC_EMP FOREIGN KEY (Emp_ID)
-        REFERENCES EMPLOYEE(Emp_ID)
+    REFERENCES EMPLOYEE(Emp_ID),
+    CONSTRAINT FK_MECHANIC_ENGINEER FOREIGN KEY(Engineer_Emp_ID) REFERENCES ENGINEER(Emp_ID)
 );
 
 CREATE TABLE PITCREW_MEMBER (
-    Emp_ID          NUMBER PRIMARY KEY,
+    Emp_ID NUMBER PRIMARY KEY,
     Pitcrew_Section VARCHAR2(50),
     CONSTRAINT FK_PITCREW_EMP FOREIGN KEY (Emp_ID)
-        REFERENCES EMPLOYEE(Emp_ID)
+    REFERENCES EMPLOYEE(Emp_ID)
 );
 
 CREATE TABLE TIRE_SET (
@@ -342,53 +285,63 @@ CREATE TABLE TIRE_SET (
 );
 
 CREATE TABLE EMP_EVENT_ASSIGNMENT (
-    Assignment_ID   NUMBER PRIMARY KEY,
-    Emp_ID          NUMBER NOT NULL,
-    Event_ID        NUMBER NOT NULL,
-    Attended        CHAR(1),
+    Assignment_ID NUMBER PRIMARY KEY,
+    Emp_ID NUMBER NOT NULL,
+    Event_ID NUMBER NOT NULL,
+    Attended CHAR(1) CHECK (Attended IN ('Y','N')),
     Assignment_Desc VARCHAR2(100),
     CONSTRAINT FK_EEA_EMP   FOREIGN KEY (Emp_ID)
-        REFERENCES EMPLOYEE(Emp_ID),
+    REFERENCES EMPLOYEE(Emp_ID),
     CONSTRAINT FK_EEA_EVENT FOREIGN KEY (Event_ID)
-        REFERENCES EVENT(Event_ID)
+    REFERENCES EVENT(Event_ID)
 );
 
-CREATE TABLE RACE_SESSION (
-    Session_ID    NUMBER(10) CONSTRAINT PK_RACE_SESSION PRIMARY KEY,
+CREATE TABLE RACE_SESSION (--Changed name to SESSION
+    Session_ID    NUMBER(10) CONSTRAINT PK_SESSION PRIMARY KEY,
     Event_ID      NUMBER(10) NOT NULL
-                  CONSTRAINT FK_RS_EVENT REFERENCES EVENT(Event_ID),
+                  CONSTRAINT FK_SESSION_EVENT REFERENCES EVENT(Event_ID),
     Session_Type  VARCHAR2(20) NOT NULL,
     Start_Time    TIMESTAMP NOT NULL,
     Best_Lap_Time NUMBER(10,3),
     isPractice    CHAR(1) DEFAULT 'N'
-                  CONSTRAINT CHK_RS_PRACTICE
+                  CONSTRAINT CHK_SESSION_PRACTICE
                       CHECK (isPractice IN ('Y','N'))
 );
 
 CREATE TABLE DRIVER_SESSION (
-    Emp_ID     NUMBER(10) CONSTRAINT FK_DS_EMP
-                   REFERENCES EMPLOYEE(Emp_ID),
+    Emp_ID NUMBER(10) CONSTRAINT FK_DS_EMP
+    REFERENCES DRIVER(Emp_ID),
     Session_ID NUMBER(10) CONSTRAINT FK_DS_SESSION
-                   REFERENCES RACE_SESSION(Session_ID),
+    REFERENCES RACE_SESSION(Session_ID),
     CONSTRAINT PK_DRIVER_SESSION PRIMARY KEY (Emp_ID, Session_ID)
 );
 
 CREATE TABLE PITSTOP (
-    PS_ID        NUMBER(10) CONSTRAINT PK_PITSTOP PRIMARY KEY,
-    Session_ID   NUMBER(10) NOT NULL
-                 CONSTRAINT FK_PS_SESSION
-                     REFERENCES RACE_SESSION(Session_ID),
-    Car_ID       NUMBER(10) NOT NULL
-                 CONSTRAINT FK_PS_CAR
-                     REFERENCES CAR(Car_ID),
-    Lap_Number   NUMBER(3)  NOT NULL,
+    PS_ID NUMBER(10) CONSTRAINT PK_PITSTOP PRIMARY KEY,
+    Session_ID NUMBER(10) NOT NULL CONSTRAINT FK_PS_SESSION REFERENCES RACE_SESSION(Session_ID),
+    Car_ID NUMBER(10) NOT NULL CONSTRAINT FK_PS_CAR REFERENCES CAR(Car_ID),
+    Lap_Number NUMBER(3)  NOT NULL,
     Duration_Sec NUMBER(6,3) NOT NULL,
-    Stop_Type    VARCHAR2(20) DEFAULT 'TYRE_CHANGE'
-                 CONSTRAINT CHK_PS_TYPE CHECK (Stop_Type IN (
-                     'TYRE_CHANGE','FRONT_WING','NOSE_CHANGE',
-                     'DRIVE_THROUGH','REPAIR','RETIRE')),
+    Stop_Type VARCHAR2(20) DEFAULT 'TYRE_CHANGE' CONSTRAINT CHK_PS_TYPE CHECK (Stop_Type IN ('TYRE_CHANGE','FRONT_WING','NOSE_CHANGE', 'DRIVE_THROUGH','REPAIR','RETIRE')),
     CONSTRAINT CHK_PS_DUR CHECK (Duration_Sec > 0),
     CONSTRAINT CHK_PS_LAP CHECK (Lap_Number > 0)
+);
+
+CREATE TABLE PITCREW_ASSIGNMENT(
+    Emp_ID NUMBER NOT NULL,
+    PS_ID NUMBER(10) NOT NULL,
+
+    CONSTRAINT PK_PITCREW_ASSIGNMENT
+    PRIMARY KEY (PS_ID, Emp_ID),
+
+    CONSTRAINT FK_PCA_PITSTOP
+    FOREIGN KEY (PS_ID)
+    REFERENCES PITSTOP(PS_ID),
+
+    CONSTRAINT FK_PCA_EMPLOYEE
+    FOREIGN KEY (Emp_ID)
+    REFERENCES EMPLOYEE(Emp_ID)
+
 );
 
 CREATE TABLE WEATHER_CONDITION (
@@ -454,18 +407,14 @@ CREATE TABLE RACE_RESULT (
     Event_ID        NUMBER(10) NOT NULL
                     CONSTRAINT FK_RR_EVENT
                         REFERENCES EVENT(Event_ID),
-    Emp_ID          NUMBER(10) NOT NULL
-                    CONSTRAINT FK_RR_EMP
-                        REFERENCES EMPLOYEE(Emp_ID),
+    Emp_ID NUMBER(10) NOT NULL CONSTRAINT FK_RR_EMP REFERENCES DRIVER(Emp_ID),
     Final_Position  NUMBER(2),
-    Status          VARCHAR2(15) DEFAULT 'FINISHED'
-                    CONSTRAINT CHK_RR_STATUS CHECK (Status IN (
-                        'FINISHED','DNF','DNS','DSQ','CLASSIFIED')),
+    Status VARCHAR2(15) DEFAULT 'FINISHED' CONSTRAINT CHK_RR_STATUS CHECK (Status IN ('FINISHED','DNF','DNS','DSQ','CLASSIFIED')),
     Total_Race_Time NUMBER(10,3),
-    Fastest_Lap     NUMBER(10,3),
+    Fastest_Lap NUMBER(10,3),
     Points_Awarded  NUMBER(4,1) DEFAULT 0,
-    CONSTRAINT CHK_RR_POS      CHECK (Final_Position BETWEEN 1 AND 20),
-    CONSTRAINT CHK_RR_PTS      CHECK (Points_Awarded >= 0),
+    CONSTRAINT CHK_RR_POS CHECK (Final_Position BETWEEN 1 AND 20),
+    CONSTRAINT CHK_RR_PTS CHECK (Points_Awarded >= 0),
     CONSTRAINT UQ_RR_EVENT_EMP UNIQUE (Event_ID, Emp_ID)
 );
 
